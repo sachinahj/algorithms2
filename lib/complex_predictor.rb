@@ -26,42 +26,33 @@ class ComplexPredictor < Predictor
       end
     end
 
-    @knowledge = Hash.new(){[]}
+    @tf_idf = Hash.new()
     @data.each do |category, properties|
       @data[category][:words].select! {|word, count| good_token?(word)}
-      @knowledge[category] = [];
+      @tf_idf[category] = {:tf => {}, :idf => {}, :tf_idf => {}};
     end
 
     @data.each do |category, properties|
       @data[category][:words].map do |word, count|
-        @data[category][:words][word] = count/(@data[category][:total].to_f)
+        @tf_idf[category][:tf][word] = count/(@data[category][:total].to_f)
       end
     end
-
 
     @data.each do |category, properties|
       @data[category][:words].each do |word, count|
-        the_all_mighty_chosen_category = nil
-        all_mighty_juice = 0
+        counter = 0
         @data.each do |category, properties|
-          if @data[category][:words][word] >= all_mighty_juice
-            all_mighty_juice = @data[category][:words][word]
-            the_all_mighty_chosen_category = category
-          end
+          counter += 1 if @data[category][:words][word] != 0
         end
-        if the_all_mighty_chosen_category != nil
-          @knowledge[the_all_mighty_chosen_category] << word
-        end
+        @tf_idf[category][:idf][word] = Math.log(4.0 / counter)
       end
     end
 
-    # Checks to see if each knowledge[category] array is unique
-    # @data.each do |category1, properties|
-    #   @data.each do |category2, properties|
-    #     puts "#{category1} vs #{category2}"
-    #     p (@knowledge[category1] & @knowledge[category2]).length
-    #   end
-    # end
+    @tf_idf.each do |category, properties|
+      @tf_idf[category][:tf].each do |word, tf_val|
+        @tf_idf[category][:tf_idf][word] = @tf_idf[category][:tf][word] * @tf_idf[category][:idf][word]
+      end
+    end
   end
 
   # Public: Predicts category.
@@ -70,19 +61,19 @@ class ComplexPredictor < Predictor
   #
   # Returns a category.
   def predict(tokens)
-    # Always predict astronomy, for now.
-    
-    prediction = nil
-    prediction_count = 0
+    @counter = Hash.new()
     @data.each do |category, properties|
-      puts "#{category} ---> #{(@knowledge[category] & tokens).length}"
-      if (@knowledge[category] & tokens).length > prediction_count
-        prediction = category
-        prediction_count = (@knowledge[category] & tokens).length
+      @counter[category] = 0
+    end
+    
+    tokens.each do |word|
+      @data.each do |category, properties|
+        if @tf_idf[category][:tf_idf][word]
+          @counter[category] += @tf_idf[category][:tf_idf][word]
+        end
       end
     end
-
-    return prediction
+    return (@counter.max_by{|category, count| count})[0]
   end
 end
 
