@@ -32,43 +32,36 @@ class ComplexPredictor < Predictor
       @knowledge[category] = [];
     end
 
-    puts "@knowledge --> #{@knowledge}"
-    puts "@data[:religion][:words]['project'] --> #{@data[:religion][:words]['project']}"
-
     @data.each do |category, properties|
       @data[category][:words].map do |word, count|
         @data[category][:words][word] = count/(@data[category][:total].to_f)
-        # binding.pry
       end
     end
 
 
     @data.each do |category, properties|
       @data[category][:words].each do |word, count|
-        puts "word --> #{word}"
         the_all_mighty_chosen_category = nil
         all_mighty_juice = 0
-        # binding.pry
         @data.each do |category, properties|
-          # binding.pry
-          if @data[category][:words][word] >= count
-            all_mighty_juice = count
+          if @data[category][:words][word] >= all_mighty_juice
+            all_mighty_juice = @data[category][:words][word]
             the_all_mighty_chosen_category = category
-            # binding.pry
           end
         end
-        # binding.pry
         if the_all_mighty_chosen_category != nil
-          # binding.pry
           @knowledge[the_all_mighty_chosen_category] << word
         end
       end
     end
 
-
-    p @knowledge
-
-
+    # Checks to see if each knowledge[category] array is unique
+    # @data.each do |category1, properties|
+    #   @data.each do |category2, properties|
+    #     puts "#{category1} vs #{category2}"
+    #     p (@knowledge[category1] & @knowledge[category2]).length
+    #   end
+    # end
   end
 
   # Public: Predicts category.
@@ -78,23 +71,18 @@ class ComplexPredictor < Predictor
   # Returns a category.
   def predict(tokens)
     # Always predict astronomy, for now.
-    tokens_data = Hash.new() {0}
-    tokens.each {|word| tokens_data[word] += 1}
     
-    counter = Hash.new() {0}   
+    prediction = nil
+    prediction_count = 0
     @data.each do |category, properties|
-      counter[category] = 0
+      puts "#{category} ---> #{(@knowledge[category] & tokens).length}"
+      if (@knowledge[category] & tokens).length > prediction_count
+        prediction = category
+        prediction_count = (@knowledge[category] & tokens).length
+      end
     end
-    
-    tokens_data.each do |word, count|
-      @data.each do |category, properties|
-        counter[category] += count if @knowledge[category].include?(word)
-      end 
-    end
-    p "counter: #{counter}"
-    counter.sort.map do |category, count|
-      return category# keys will arrive in order to this block, with their associated value.
-    end
+
+    return prediction
   end
 end
 
