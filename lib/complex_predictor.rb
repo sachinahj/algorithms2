@@ -32,7 +32,9 @@ class ComplexPredictor < Predictor
       @tf_idf[category] = {:tf => {}, :idf => {}, :tf_idf => {}};
     end
 
+    category_count = 0
     @data.each do |category, properties|
+      category_count += 1
       @data[category][:words].map do |word, count|
         @tf_idf[category][:tf][word] = count/(@data[category][:total].to_f)
       end
@@ -44,7 +46,7 @@ class ComplexPredictor < Predictor
         @data.each do |category, properties|
           counter += 1 if @data[category][:words][word] != 0
         end
-        @tf_idf[category][:idf][word] = Math.log(4.0 / counter)
+        @tf_idf[category][:idf][word] = Math.log(category_count / counter)
       end
     end
 
