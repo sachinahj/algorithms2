@@ -1,6 +1,6 @@
 class Binary
   def self.recursive_search(array, find, f_index=0, l_index=array.length-1) 
-    puts "array: #{array}"
+    # puts "array: #{array}"
     midpoint = (array.length - 1) / 2
     # puts "midpoint: #{midpoint}"
 
@@ -12,7 +12,7 @@ class Binary
     end
 
     if array[midpoint] > find
-      index = self.recursive_search(array[0..midpoint], find, f_index, (l_index - array[(midpoint+1)..-1].length))
+      index = self.recursive_search(array[0..(midpoint-1)], find, f_index, (l_index - array[midpoint..-1].length))
     end 
 
     if array[midpoint] < find
@@ -32,3 +32,15 @@ p Binary.recursive_search([2,4,6,8,10,14,15], 8)
 p Binary.recursive_search([2,4,6,8,10,14,15], 10)
 p Binary.recursive_search([2,4,6,8,10,14,15], 14)
 p Binary.recursive_search([2,4,6,8,10,14,15], 15)
+
+array = [-9,1,2,4,5,7,11,23,54]
+
+p Binary.recursive_search(array, -9)
+p Binary.recursive_search(array, 1)
+p Binary.recursive_search(array, 2)
+p Binary.recursive_search(array, 4)
+p Binary.recursive_search(array, 5)
+p Binary.recursive_search(array, 7)
+p Binary.recursive_search(array, 11)
+p Binary.recursive_search(array, 23)
+p Binary.recursive_search(array, 54)
